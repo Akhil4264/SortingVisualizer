@@ -1,62 +1,168 @@
-import Header from './components/header';
-import Array from './components/array';
-import Sorting from './components/Sorting';
-import React,{useState} from 'react';
-import _ from 'lodash';
+import Header from "./components/header";
+import Array from "./components/array";
+import Sorting from "./components/Sorting";
+import React, { useState, useEffect } from "react";
+import _ from "lodash";
 
 function App() {
+  const [array, Setarray] = useState([]);
 
-	const [array,Setarray] = useState([]);
+  function delay(time) {
+    return new Promise((resolve) => setTimeout(resolve, time));
+  }
 
-	function delay(time) {
-		return new Promise(resolve => setTimeout(resolve, time));
-	}
+  const BubbleSort = async () => {
+    var temp = [...array];
+    for (var i = 0; i < temp.length; i++) {
+      for (var j = 0; j < temp.length - 1 - i; j++) {
+        if (temp[j] - temp[j + 1] > 0) {
+          var foo = temp[j];
+          temp[j] = temp[j + 1];
+          temp[j + 1] = foo;
+        }
+        Setarray([...temp]);
+        await delay(1);
+      }
+    }
+  };
 
-	const BubbleSort = async()=>{
-		var temp = [...array]
-		for(var i=0;i<temp.length;i++){
-			for(var j =0;j<temp.length-1-i;j++){
-				if(temp[j] - temp[j+1] > 0){
-					var foo = temp[j]
-					temp[j] = temp[j+1]
-					temp[j+1] = foo
-					//swap
-				}
-				Setarray([...temp])
-				await delay(0.1);
-			}
+  const Merge = async(first,last,leftArr,rightArr)=>{
+	
+	const result1 = await leftArr;
+    const left = [...result1];
+
+	const result2 = await rightArr;
+    const right = [...result2];
+	let i = 0
+	let j = 0
+	let k = 0
+
+	var temp = []
+	while(i<left.length && j<right.length){
+		if(left[i] <= right[j]){
+			temp[k] = left[i]
+			k+=1
+			i+=1
 		}
-		
-    }
-
-    const MergeSort = ()=>{
-        console.log("sorting using MergeSort")
-    }
-
-    const QuickSort = ()=>{
-        console.log("sorting using QuickSort")
-    }
-
-    const HeapSort = ()=>{
-        console.log("sorting using HeapSort")
-    }
-
-	const createArray = (n)=>{
-
-		const start = 1,end = ++n, step = 1;
-		const arr = _.range(start, end, step);
-  		arr.sort(() => Math.random() - 0.5); 
-		Setarray(arr);
-  		
+		else{
+			temp[k] = right[j]
+			k+=1
+			j+=1
+		}
 	}
+	while(i<left.length){
+		temp[k] = left[i]
+		k+=1
+		i+=1
+	}
+	while(j<right.length){
+		temp[k] = right[j]
+		k+=1
+		j+=1
+	}
+
+	Setarray(array.map((val,index)=>{
+		if(index >= first && index <= last){
+			return temp[index-first]
+		}
+		else{
+			return val
+		}
+	}))
+
+	await delay((last-first+1)*50)
+
+	return temp
+	
+
+  }
+
+  const MergeSort = async(first,last,list)=>{
+	if(list.length <=1){
+		return list
+		// return ;
+	}
+	const mid = Math.floor(list.length/2)
+	const leftArr = list.slice(0,mid)
+	const rightArr = list.slice(mid)
+	const left = MergeSort(first,mid-1,leftArr)
+	const right = MergeSort(mid,last,rightArr)
+	const res = Merge(first,last,left,right)
+	return res
+  }
+
+  const QuickSort = async (first, last, list) => {
+    //Randomized Quicksort
+    if (first >= last) {
+      return;
+    }
+    var difference = last - first;
+    var rand = Math.random();
+    rand = Math.floor(rand * difference);
+    rand = rand + first;
+    var i = first;
+    var j = first;
+    var pivot = rand;
+    while (i <= last) {
+      if (list[i] >= list[pivot]) {
+        i += 1;
+      } else {
+        var foo = list[i];
+        list[i] = list[j];
+        list[j] = foo;
+        if (j === pivot) {
+          pivot = i;
+        }
+        i += 1;
+        j += 1;
+      }
+      Setarray([...list]);
+      await delay(1);
+    }
+
+    var too = list[pivot];
+    list[pivot] = list[j];
+    list[j] = too;
+
+    Setarray([...list]);
+    await delay(1);
+
+    QuickSort(first, j - 1, list);
+    QuickSort(j + 1, last, list);
+  };
+
+  const Heapify = () =>{
+
+  }
+  
+  const HeapSort = async (first, last) => {
+	
+  };
+
+
+  const createArray = (n) => {
+    const start = 1,
+      end = ++n,
+      step = 1;
+    const arr = _.range(start, end, step);
+    arr.sort(() => Math.random() - 0.5);
+    Setarray(arr);
+    console.log("created array : ", arr);
+  };
 
   return (
-	<div className="bg-black text-light h-100">
-		<Header createArray = {createArray} />
-		<Array array = {array} />
-		<Sorting BubbleSort={BubbleSort} MergeSort={MergeSort} QuickSort={QuickSort} HeapSort={HeapSort} />
-		<br/>
-	</div>
+    <div className="bg-black text-light h-100">
+      <Header createArray={createArray} />
+      <Array array={array} />
+      <Sorting
+        BubbleSort={BubbleSort}
+        MergeSort={MergeSort}
+        QuickSort={QuickSort}
+        HeapSort={HeapSort}
+        Array={array}
+      />
+      <br />
+    </div>
   );
 }
 
